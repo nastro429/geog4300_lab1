@@ -14,7 +14,7 @@ library(knitr)
 
 ## Loading data into R, data transformation, and summary statistics
 
-Your name: 
+Your name: Nathan Castro
 
 **Overview:**
 
@@ -52,47 +52,67 @@ kable(head(daymet_data))
 
 **Question 1:** After loading the file into R, pick TWO variables and determine whether they are nominal, ordinal, interval, and ratio data using the course readings and lectures as reference. Justify each classification in a sentence or two.
 
-{Your response goes here.}
+{cty_name is a type of nominal data because a city name is unique and made up of letters. Sum_prcp is a type of ratio data because it is a number but the value could be 0.}
 
 There are a lot of observations here, 452,448, to be exact. To get a better grasp on it, we can use group_by and summarise in the tidyverse package, which we covered in class. This will allow us to identify the mean value for each year by county across the study period.
 
 **Question 2:** Use group_by and summarise to calculate the mean minimum temperature for each year *by county* across all months, also including State and Region as grouping variables. Your resulting dataset should show the value of tmin for each county in each year. Use the kable and head functions as shown above to call the resulting table.
 
 ```{r}
-#Your code goes here.
+tmin_data <- daymet_data %>% 
+  group_by(cty_txt, state, region, year) %>% 
+  summarise(tmin_mean = mean(median_tmin))
+kable(head(tmin_data))
 ```
 
 
 **Question 3:** What if we were only interested in the South Region? Filter the original data frame (daymet_data) to just include counties in this region. Then calculate the mean minimum temperature by year *for each state.* For an optional extra challenge, use the round function to include only 1 decimal point. You can type ?round in the console to find documentation on this function. Use kable and head to call the first few lines of the resulting table
 
 ```{r}
-#Your code goes here.
+daymet_data_SR <- daymet_data %>% 
+  filter(region =='South Region') %>% 
+  group_by(state, year)%>%
+  summarise(meanmt = mean(median_tmin))
+  kable(head(daymet_data_SR))
 ```
 
 
 **Question 4:** To visualize the trends, we could use ggplot to visualize change in mean temperature over time. Create a line plot (geom_line) showing the state means you calculated in question 3. Use the color parameter to show separate colors for each state. You may also need to define the state as a group in the aesthetic parameter.
 
 ```{r}
-#Your code goes here.
+ggplot(daymet_data_SR, aes(x=year,y=meanmt,color=state,group=state))+
+  geom_line()
 ```
 
 
 **Question 5:** If you wanted to look at these data as a table, you'd need to have it in wide format. Use the pivot_wider function to create a wide format version of the data frame you created in question 3. In this case, the rows should be states, the columns should be the years, and the data in those columns should be mean minimum temperatures. Then call the *whole table* using kable.
 
 ```{r}
-#Your code goes here.
+wide_data <-daymet_data_SR %>% 
+  pivot_wider(names_from = year, values_from = meanmt)
+kable(wide_data)
 ```
 
 
 **Question 6:** Let's assess the relationship of heat and precipitation by region. Returning to the original dataset, create a data frame that shows the mean *maximum* temperature and mean precipitation for *all* states in 2015, also including region as a subgroup. Then use ggplot to create a scatterplot (geom_point) for these two variables, coloring the points using the region variable.
 
 ```{r}
-#Your code goes here.
+heat_prcp <- daymet_data %>% 
+  group_by(state, region) %>%
+  filter(year == "Y2015") %>%
+ summarise(mTemp = mean(median_tmax), mPrcp = mean(sum_prcp))
+  ggplot(heat_prcp, aes(x=mTemp,y=mPrcp,color=region))+
+  geom_point()
+
+
+  
+  
+  
 ```
 
 **Question 7:** In the space below, explain what each function in your code for question 6 does to the dataset in plain English. 
 
-{Your response here.}
+{First i created a new data frame called heat_prcp that would pull data from daymet_data. I then grouped_by state and region to isolate each state with their corresponding region in the table. I also filtered the dataset by year = 2015 since that is what we were asked to look at. Afterwards i used the summarise function to find the mean values for max temperature and precipitation. Using the summarise function also creates the two new columns in the table. At the end i hadto visualize the data with ggplot. I set the data frame as the new heat_prcp, set the x and y axis to the new mean values i made and changed the color to region. I used geom_point to make it a scatterplot.}
 
 **Bonus question:** In script 1-3, we covered ways of working with the Daymet API. Create a script below that uses that daymetr package to download data from Daymet for a place (or places) of your choosing, uses a dplyr function (e.g., mutate, summarise, filter, etc.) to wrangle the data, and then visualizes it using ggplot. In addition to this code, write a short summary of a pattern that's evident in the data you visualized.
 
@@ -103,3 +123,5 @@ There are a lot of observations here, 452,448, to be exact. To get a better gras
 {Explanation goes here.}
 
 **Lab reflection:** How do you feel about the work you did on this lab? Was it easy, moderate, or hard? What were the biggest things you learned by completing it?
+
+I found this lab to be moderate. I found I had the right idea of how to do the tasks but ran into a handful of syntax errors that I had to look up. 
